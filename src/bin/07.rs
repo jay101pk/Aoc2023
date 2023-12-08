@@ -28,27 +28,22 @@ impl PartialOrd for Hand {
         if self.cards == other.cards {
             return Some(Ordering::Equal);
         }
-        let a = self
-            .cards
-            .clone()
-            .into_iter()
-            .zip(other.cards.clone().into_iter())
-            .find_map(|(c1, c2)| {
-                let s1 = score_label(c1, self.joker);
-                let s2 = score_label(c2, other.joker);
-                if s1 > s2 {
-                    return Some(Ordering::Greater);
-                }
-                if s2 > s1 {
-                    return Some(Ordering::Less);
-                }
-                None
-            });
+        let a = self.cards.iter().zip(&other.cards).find_map(|(c1, c2)| {
+            let s1 = score_label(*c1, self.joker);
+            let s2 = score_label(*c2, other.joker);
+            if s1 > s2 {
+                return Some(Ordering::Greater);
+            }
+            if s2 > s1 {
+                return Some(Ordering::Less);
+            }
+            None
+        });
         if a.is_some() {
             return a;
         }
 
-        return Some(Ordering::Equal);
+        Some(Ordering::Equal)
     }
 }
 
@@ -59,7 +54,12 @@ fn score_hand(cards: &[char], joker: bool) -> u32 {
         *m.entry(*card).or_insert(0) += 1;
     }
 
-    if cards.into_iter().collect::<String>().cmp(&String::from("JJJJJ")).is_eq() {
+    if cards
+        .iter()
+        .collect::<String>()
+        .cmp(&String::from("JJJJJ"))
+        .is_eq()
+    {
         return 6;
     }
 
@@ -99,9 +99,9 @@ fn score_label(c: char, joker: bool) -> u32 {
             '2' => 3,
             '1' => 2,
             _ => 0,
-        }
+        };
     }
-    
+
     match c {
         'A' => 14,
         'K' => 13,
@@ -150,29 +150,29 @@ pub fn part_one(input: &str) -> Option<u32> {
 
 pub fn part_two(input: &str) -> Option<u32> {
     let mut hands: Vec<Hand> = input
-    .lines()
-    .map(|s| {
-        let mut a = s.split_whitespace();
-        let cards = a.next().unwrap();
-        let bet = a.next().unwrap();
-        Hand {
-            cards: cards.chars().collect(),
-            bet: bet.parse().unwrap(),
-            joker: true,
-        }
-    })
-    .collect();
+        .lines()
+        .map(|s| {
+            let mut a = s.split_whitespace();
+            let cards = a.next().unwrap();
+            let bet = a.next().unwrap();
+            Hand {
+                cards: cards.chars().collect(),
+                bet: bet.parse().unwrap(),
+                joker: true,
+            }
+        })
+        .collect();
 
-hands.sort_by(|a, b| Hand::partial_cmp(a, b).unwrap());
+    hands.sort_by(|a, b| Hand::partial_cmp(a, b).unwrap());
 
-// println!("{:?}", hands);
+    // println!("{:?}", hands);
 
-Some(
-    hands
-        .into_iter()
-        .enumerate()
-        .fold(0, |a, h| a + ((h.0 + 1) as u32 * h.1.bet)),
-)
+    Some(
+        hands
+            .into_iter()
+            .enumerate()
+            .fold(0, |a, h| a + ((h.0 + 1) as u32 * h.1.bet)),
+    )
 }
 
 #[cfg(test)]
