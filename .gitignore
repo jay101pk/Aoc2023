@@ -24,3 +24,4 @@ data/puzzles/*
 
 # Dhat
 dhat-heap.json
+.vscode/launch.json
